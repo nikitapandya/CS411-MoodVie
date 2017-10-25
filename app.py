@@ -51,7 +51,6 @@ def tested():
     print(text)
 
     headers = {
-    # Request headers. Replace the placeholder key below with your subscription key.
     'Content-Type': 'application/json',
     'Ocp-Apim-Subscription-Key': '82c354542ca9458b9374839f1171647b',
     }
@@ -64,9 +63,6 @@ def tested():
 
     payload = "{}"
     try:
-        # NOTE: You must use the same region in your REST call as you used to obtain your subscription keys.
-        #   For example, if you obtained your subscription keys from westcentralus, replace "westus" in the 
-        #   URL below with "westcentralus".
         conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
         conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
         res = conn.getresponse()
