@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, abort, redirect, url_for, sen
 import requests, http.client
 import urllib.request, urllib.parse, urllib.error, base64, sys
 import json
+import random
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
@@ -20,21 +21,14 @@ def index():
 def User_Action():
 
     text = request.form["Genre"]
-
-    processed_text = "api.themoviedb.org/3/genre/"+ text + "/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08"
-
-
     payload = "{}"
     try:
-        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08", payload)
-
+        randomPage = random.randint(0,1000) 
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08&page=" + str(randomPage), payload)
 
         res = conn.getresponse()
         data = res.read()
-
-        dataj = json.loads(data.decode())   
-
-        #print(data.decode("utf-8"))
+        dataj = json.loads(data.decode()) 
 
         titles = ""
         for i in range(20):
