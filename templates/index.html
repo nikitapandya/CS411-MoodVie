@@ -3,19 +3,17 @@
 
 </head>
 <body>
-    <h1> Type the genre you would like to see! </h1>
-    <div class="wrapper">
-        <!--	<form action="/cs411project.py">
-        <input type="text" name = "genre"/>
-        <input type="submit" value = "Submit"/>
-    	</form>
-         <form method="post" action="{{('UserAction')}}">
-         <input type="tag_word" name="tag_word"><br>
-    </form>
-    -->
+    <h2> Type the genre you would like to see! </h2>
         <form action="/User_Action/" method="post">
             <input type="text" name="Genre"/><br>
             <input type="submit" value="Enter">
+        </form>
+
+    <h2> Enter a URL of a photo! </h2>
+    <h4>Acceptable extensions:  'png', 'jpg', 'jpeg', 'gif'</h4>
+        <form action="/EnterURL/" method="post">
+            <input type="text" name="url">
+            <input type=submit value="Enter a URL">
         </form>
 
         <table>

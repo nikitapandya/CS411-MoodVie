@@ -1,7 +1,10 @@
+import os
 import urllib
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, redirect, url_for, send_from_directory
 import requests, http.client
+import urllib.request, urllib.parse, urllib.error, base64, sys
 import json
+from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 try:
@@ -41,10 +44,41 @@ def User_Action():
     except Exception as e:
         print(e.args) 
 
+@app.route("/EnterURL/", methods=["POST", "GET"])
+def tested():
+
+    text = request.form["url"]
+    print(text)
+
+    headers = {
+    'Content-Type': 'application/json',
+    'Ocp-Apim-Subscription-Key': '82c354542ca9458b9374839f1171647b',
+    }
+
+    params = urllib.parse.urlencode({
+    })
+
+    body = "{ 'url': '" + text + "' }"
+    print(body)
+
+    payload = "{}"
+    try:
+        conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
+        conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
+        res = conn.getresponse()
+        data = res.read()
+        # print(data)
+        conn.close()
+        return data
+    except Exception as e:
+        print(e.args)
+
+
+
 #for 500 (internal server error) and 404 error
 @app.errorhandler(500)
 def internal_error(error):
-    return "Genre doesn't exist"
+    return "500"
 
 @app.errorhandler(404)
 def not_found(error):
