@@ -24,7 +24,6 @@ def User_Action():
     payload = "{}"
     try:
         conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08" , payload)
-
         res = conn.getresponse()
         data = res.read()
         dataj = json.loads(data.decode()) 
