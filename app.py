@@ -23,8 +23,7 @@ def User_Action():
     text = request.form["Genre"]
     payload = "{}"
     try:
-        randomPage = random.randint(0,1000) 
-        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08&page=" + str(randomPage), payload)
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08" , payload)
 
         res = conn.getresponse()
         data = res.read()
