@@ -21,9 +21,22 @@ def index():
 def User_Action():
 
     text = request.form["Genre"]
+    randomPage = 1
     payload = "{}"
     try:
-        randomPage = random.randint(0,1000) 
+        #temporary (cause inefficient) way to getting total number of pages 
+        #so we can get results from a random page 
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08", payload)
+        resTest = conn.getresponse()
+        dataTest = resTest.read()
+        dataT = json.loads(dataTest.decode()) 
+
+        totalPages = dataT['total_pages']
+        if totalPages >= 1000:
+            randomPage = random.randint(0,1000) 
+        else:
+            randomPage = random.randint(0,totalPages) 
+
         conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08&page=" + str(randomPage), payload)
 
         res = conn.getresponse()
