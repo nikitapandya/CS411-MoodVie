@@ -6,6 +6,7 @@ import urllib.request, urllib.parse, urllib.error, base64, sys
 import json
 import random
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declared_attr
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
 
@@ -33,10 +34,29 @@ lm.login_view = 'index'
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    social_id = db.Column(db.String(64), nullable=False, unique=True)
+    id = db.Column(db.Integer, unique=True)
+    social_id = db.Column(db.String(64), nullable=False, primary_key=True, unique=True)
     nickname = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True)
+
+
+class SuggestionMixin(object):
+
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+    __table_args__ = {'mysql_engine': 'InnoDB'}
+    __mapper_args__= {'always_refresh': True}
+
+
+class Suggestion(SuggestionMixin, db.Model):
+    __tablename__ = 'suggestions'
+    id =  db.Column(db.Integer, primary_key=True)
+    sugg1 = db.Column(db.String(64), unique=True) 
+    sugg2 = db.Column(db.String(64), unique=True) 
+    sugg3 = db.Column(db.String(64), unique=True) 
+    sugg4 = db.Column(db.String(64), unique=True) 
+    sugg5 = db.Column(db.String(64), unique=True) 
 
 
 @lm.user_loader
@@ -68,13 +88,16 @@ def oauth_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('index'))
     oauth = OAuthSignIn.get_provider(provider)
-    social_id, username, email = oauth.callback()
+    social_id, username = oauth.callback()
+    print(social_id)
+    print(username)
     if social_id is None:
         flash('Authentication failed.')
         return redirect(url_for('index'))
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
-        user = User(social_id=social_id, nickname=username, email=email)
+        user = User(social_id=social_id, nickname=username)
+        print(user)
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
@@ -131,6 +154,11 @@ def tested():
         return data
     except Exception as e:
         print(e.args)
+
+
+@app.route("/testupload/")
+def randtest():
+    return render_template('upload.html')
 
 @app.route("/EnterURLmovie/", methods=["POST", "GET"])
 def testedmovie():
