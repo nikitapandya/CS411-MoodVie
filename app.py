@@ -11,6 +11,8 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from oauth import OAuthSignIn
 from secret import Secret
 
+from sqlalchemy.orm import relationship
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -31,12 +33,18 @@ db = SQLAlchemy(app)
 lm = LoginManager(app)
 lm.login_view = 'index'
 
+user_sugg = db.Table('user_sugg',
+        db.Column('users_id', db.Integer(), db.ForeignKey('users.id')),
+        db.Column('suggestions_id', db.Integer(), db.ForeignKey('suggestions.id')))
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, unique=True)
-    social_id = db.Column(db.String(64), nullable=False, primary_key=True, unique=True)
+    id = db.Column(db.Integer, primary_key=True)
+    social_id = db.Column(db.String(64), nullable=False, unique=True)
     nickname = db.Column(db.String(64), nullable=False)
+    sugg = db.relationship('Suggestion', secondary=user_sugg,
+                            backref=db.backref('users', lazy='dynamic'))
 
 
 class SuggestionMixin(object):
@@ -52,11 +60,11 @@ class SuggestionMixin(object):
 class Suggestion(SuggestionMixin, db.Model):
     __tablename__ = 'suggestions'
     id =  db.Column(db.Integer, primary_key=True)
-    sugg1 = db.Column(db.String(64), unique=True) 
-    sugg2 = db.Column(db.String(64), unique=True) 
-    sugg3 = db.Column(db.String(64), unique=True) 
-    sugg4 = db.Column(db.String(64), unique=True) 
-    sugg5 = db.Column(db.String(64), unique=True) 
+    sugg1 = db.Column(db.String(255), unique=True) 
+    sugg2 = db.Column(db.String(255), unique=True) 
+    sugg3 = db.Column(db.String(255), unique=True) 
+    sugg4 = db.Column(db.String(255), unique=True) 
+    sugg5 = db.Column(db.String(255), unique=True) 
 
 
 @lm.user_loader
@@ -89,15 +97,12 @@ def oauth_callback(provider):
         return redirect(url_for('index'))
     oauth = OAuthSignIn.get_provider(provider)
     social_id, username = oauth.callback()
-    print(social_id)
-    print(username)
     if social_id is None:
         flash('Authentication failed.')
         return redirect(url_for('index'))
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
         user = User(social_id=social_id, nickname=username)
-        print(user)
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
@@ -121,12 +126,22 @@ def User_Action(mood):
 
         titles = ""
         randomnums = []
+        suggestionLst = []
+
         while len(randomnums) < 5:
             randindex = random.randint(0,19)
             if randindex not in randomnums:
                 randomnums.append(randindex)
         for i in range(5):
             titles += dataj['results'][randomnums[i]]['original_title'] + ", "
+            suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
+
+        suggestions = Suggestion(sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
+        db.session.add(suggestions)
+        db.session.commit()
+        print(suggestionLst)
+        print(sugg2)
+
         return titles[:-2]
 
     except Exception as e:
