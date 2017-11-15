@@ -8,15 +8,15 @@ import random
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
-
+from secret import Secret
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['OAUTH_CREDENTIALS'] = {
     'twitter': {
-        'id': 'UoqrkldEWdvHMN0fkgCJ2QBO2',
-        'secret': 'zVbt9Y2pUt9FA3S6i7POtnprrM9jpS1Ij1JLNrwsiAOW4H3H61'
+        'id': Secret.twitterid,
+        'secret': Secret.twittersecret
     }
 }
 
@@ -86,18 +86,24 @@ def User_Action(mood):
     text1 = mooddict[mood]
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
+    randompage = random.randint(1,301)
     print(text)
     #text = request.form["Genre"]
     payload = "{}"
     try:
-        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08" , payload)
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
         res = conn.getresponse()
         data = res.read()
         dataj = json.loads(data.decode()) 
 
         titles = ""
-        for i in range(20):
-            titles += dataj['results'][i]['original_title'] + ", "
+        randomnums = []
+        while len(randomnums) < 5:
+            randindex = random.randint(0,19)
+            if randindex not in randomnums:
+                randomnums.append(randindex)
+        for i in range(5):
+            titles += dataj['results'][randomnums[i]]['original_title'] + ", "
         return titles[:-2]
 
     except Exception as e:
@@ -111,7 +117,7 @@ def tested():
 
     headers = {
     'Content-Type': 'application/json',
-    'Ocp-Apim-Subscription-Key': '82c354542ca9458b9374839f1171647b',
+    'Ocp-Apim-Subscription-Key': Secret.microsoftsecret,
     }
 
     params = urllib.parse.urlencode({
@@ -140,7 +146,7 @@ def testedmovie():
 
     headers = {
     'Content-Type': 'application/json',
-    'Ocp-Apim-Subscription-Key': '82c354542ca9458b9374839f1171647b',
+    'Ocp-Apim-Subscription-Key': Secret.microsoftsecret,
     }
 
     params = urllib.parse.urlencode({
