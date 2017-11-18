@@ -60,11 +60,11 @@ class SuggestionMixin(object):
 class Suggestion(SuggestionMixin, db.Model):
     __tablename__ = 'suggestions'
     id =  db.Column(db.Integer, primary_key=True)
-    sugg1 = db.Column(db.String(255), unique=True) 
-    sugg2 = db.Column(db.String(255), unique=True) 
-    sugg3 = db.Column(db.String(255), unique=True) 
-    sugg4 = db.Column(db.String(255), unique=True) 
-    sugg5 = db.Column(db.String(255), unique=True) 
+    name = db.Column(db.String(255), unique=True) 
+    # sugg2 = db.Column(db.String(255), unique=True) 
+    # sugg3 = db.Column(db.String(255), unique=True) 
+    # sugg4 = db.Column(db.String(255), unique=True) 
+    # sugg5 = db.Column(db.String(255), unique=True) 
 
 
 @lm.user_loader
@@ -136,11 +136,13 @@ def User_Action(mood):
             titles += dataj['results'][randomnums[i]]['original_title'] + ", "
             suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
 
-        suggestions = Suggestion(sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
+        suggestions = Suggestion.query.filter_by(name=suggestionLst[0]).first()
+        print(suggestionLst)
+        suggestions = Suggestion(name=suggestionLst[0])#, sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
         db.session.add(suggestions)
         db.session.commit()
         print(suggestionLst)
-        print(sugg2)
+        print(name)
 
         return titles[:-2]
 
