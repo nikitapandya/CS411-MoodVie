@@ -4,19 +4,19 @@ from flask import Flask, render_template, request, abort, redirect, url_for, sen
 import requests, http.client
 import urllib.request, urllib.parse, urllib.error, base64, sys
 import json
-
+import random
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
-
+from secret import Secret
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['OAUTH_CREDENTIALS'] = {
     'twitter': {
-        'id': 'UoqrkldEWdvHMN0fkgCJ2QBO2',
-        'secret': 'zVbt9Y2pUt9FA3S6i7POtnprrM9jpS1Ij1JLNrwsiAOW4H3H61'
+        'id': Secret.twitterid,
+        'secret': Secret.twittersecret
     }
 }
 
@@ -81,23 +81,46 @@ def oauth_callback(provider):
     return redirect(url_for('index'))
 
 @app.route("/User_Action/", methods=["POST", "GET"])
-def User_Action():
 
-    text = request.form["Genre"]
+def User_Action(mood):
+    mooddict = {"anger": ["28", "12"], "contempt": ["27"], "disgust": ["16","99"], "fear": ["10749"], "happiness": ["35", "10402"],"neutral": ["80", "878"], "sadness": ["12"], "surprise": ["53","14","9648"]}
+    text1 = mooddict[mood]
+    randomnum = random.randint(0, len(text1)-1)
+    text = text1[randomnum]
+    randompage = random.randint(1,20)
+    print(text)
+    #text = request.form["Genre"]
     payload = "{}"
     try:
-        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=6874ac2dd0d38d7150d4f758d81f6f08" , payload)
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&sort_by=popularity.desc&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
         res = conn.getresponse()
         data = res.read()
-        dataj = json.loads(data.decode()) 
-
+        dataj = json.loads(data.decode())
         titles = ""
-        for i in range(20):
-            titles += dataj['results'][i]['original_title'] + ", "
-        return titles[:-2]
+        randomnums = []
+        suggestionLst = []
+        posterlist = []
+        overviewlist = []
 
+        while len(randomnums) < 5:
+            randindex = random.randint(0, 19)
+            if randindex not in randomnums:
+                randomnums.append(randindex)
+        for i in range(5):
+            titles += dataj['results'][randomnums[i]]['original_title'] + ", "
+            suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
+            posterlist.append("http://image.tmdb.org/t/p/w185" + dataj['results'][randomnums[i]]['poster_path'])
+            overviewlist.append(dataj['results'][randomnums[i]]['overview'])
+
+        # return titles[:-2]
+        return getResults(suggestionLst, posterlist, overviewlist)
     except Exception as e:
-        print(e.args) 
+        print(e.args)
+
+def getResults(suggestionlist, posterlist, overviewlist):
+    return render_template('results.html', suggestionlist = suggestionlist, posterlist = posterlist,
+                           overviewlist = overviewlist)
+
 
 @app.route("/EnterURL/", methods=["POST", "GET"])
 def tested():
@@ -107,7 +130,7 @@ def tested():
 
     headers = {
     'Content-Type': 'application/json',
-    'Ocp-Apim-Subscription-Key': '82c354542ca9458b9374839f1171647b',
+    'Ocp-Apim-Subscription-Key': Secret.microsoftsecret,
     }
 
     params = urllib.parse.urlencode({
@@ -127,6 +150,51 @@ def tested():
         return data
     except Exception as e:
         print(e.args)
+
+@app.route("/EnterURLmovie/", methods=["POST", "GET"])
+def testedmovie():
+
+    text = request.form["url"]
+    print(text)
+
+    headers = {
+    'Content-Type': 'application/json',
+    'Ocp-Apim-Subscription-Key': Secret.microsoftsecret,
+    }
+
+    params = urllib.parse.urlencode({
+    })
+
+    body = "{ 'url': '" + text + "' }"
+    print(body)
+
+    payload = "{}"
+    try:
+        conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
+        conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
+        res = conn.getresponse()
+        data = res.read()
+        # print(data)
+        conn.close()
+    except Exception as e:
+        print(e.args)
+
+    dictemotions = {"anger": 0, "contempt": 0, "disgust": 0, "fear": 0, "happiness": 0, "neutral":0,
+            "sadness": 0, "surprise": 0 }
+
+    datajson = json.loads(data.decode())
+    for i in range(len(datajson)):
+        emotions = (datajson[i]['scores'])
+
+        for key, value in dictemotions.items():
+            dictemotions[key] += emotions[key]
+
+    print(dictemotions)
+    mood = (max(dictemotions, key=dictemotions.get))
+    print(mood)
+    return User_Action(mood)
+
+
 
 
 if __name__ == '__main__':
