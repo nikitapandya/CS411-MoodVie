@@ -38,6 +38,7 @@ user_sugg = db.Table('user_sugg',
         db.Column('suggestions_id', db.Integer(), db.ForeignKey('suggestions.id')))
 
 
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -60,6 +61,7 @@ class SuggestionMixin(object):
 class Suggestion(SuggestionMixin, db.Model):
     __tablename__ = 'suggestions'
     id =  db.Column(db.Integer, primary_key=True)
+    mood = db.Column(db.String(255))
     sugg1 = db.Column(db.String(255), unique=True) 
     sugg2 = db.Column(db.String(255), unique=True) 
     sugg3 = db.Column(db.String(255), unique=True) 
@@ -112,10 +114,11 @@ def oauth_callback(provider):
 def User_Action(mood):
     mooddict = {"anger": ["28", "12"], "contempt": ["27"], "disgust": ["16","99"], "fear": ["10749"], "happiness": ["35", "10402"],"neutral": ["80", "878"], "sadness": ["12"], "surprise": ["53","14","9648"]}
     text1 = mooddict[mood]
+    #print("Text1: " + text1)
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
     randompage = random.randint(1,301)
-    print(text)
+    #print("Text:" + text)
     #text = request.form["Genre"]
     payload = "{}"
     try:
@@ -136,11 +139,11 @@ def User_Action(mood):
             titles += dataj['results'][randomnums[i]]['original_title'] + ", "
             suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
 
-        suggestions = Suggestion(sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
+        suggestions = Suggestion(mood= mood, sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
         db.session.add(suggestions)
         db.session.commit()
         print(suggestionLst)
-        print(suggestions   )
+        print(suggestions)
         print(Suggestion.query.first())
 
         return titles[:-2]
