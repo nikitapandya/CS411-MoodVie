@@ -140,7 +140,8 @@ def User_Action(mood):
         db.session.add(suggestions)
         db.session.commit()
         print(suggestionLst)
-        print(sugg2)
+        print(suggestions   )
+        print(Suggestion.query.first())
 
         return titles[:-2]
 
