@@ -88,8 +88,12 @@ def User_Action(mood):
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
     randompage = random.randint(1,20)
-    print(text)
+    genredict = {"28": "Action", "12": "Adventure", "16": "Animation", "35": "Comedy", "80": "Crime", "99": "Documentary",
+            "18": "Drama", "10751": "Family", "14": "Fantasy", "36": "History", "27": "Horror", "10402": "Music",
+             "9648": "Mystery", "10749": "Romance", "878": "Science Fiction", "10770": "TV Movie", "53": "Thriller",
+             "10752": "War", "37": "Western"}
     #text = request.form["Genre"]
+    genre = genredict[str(text)]
     payload = "{}"
     try:
         conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&sort_by=popularity.desc&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
@@ -113,13 +117,13 @@ def User_Action(mood):
             overviewlist.append(dataj['results'][randomnums[i]]['overview'])
 
         # return titles[:-2]
-        return getResults(suggestionLst, posterlist, overviewlist)
+        return getResults(suggestionLst, posterlist, overviewlist, mood, genre)
     except Exception as e:
         print(e.args)
 
-def getResults(suggestionlist, posterlist, overviewlist):
+def getResults(suggestionlist, posterlist, overviewlist, mood, genre):
     return render_template('results.html', suggestionlist = suggestionlist, posterlist = posterlist,
-                           overviewlist = overviewlist)
+                           overviewlist = overviewlist, mood = mood, genre = genre)
 
 
 @app.route("/EnterURL/", methods=["POST", "GET"])
