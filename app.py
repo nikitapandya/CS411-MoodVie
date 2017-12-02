@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
 from secret import Secret
+from sqlalchemy import desc
 
 from sqlalchemy.orm import relationship
 
@@ -33,20 +34,11 @@ db = SQLAlchemy(app)
 lm = LoginManager(app)
 lm.login_view = 'index'
 
-user_sugg = db.Table('user_sugg',
-        db.Column('users_id', db.Integer(), db.ForeignKey('users.id')),
-        db.Column('suggestions_id', db.Integer(), db.ForeignKey('suggestions.id')))
-
-
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=False, unique=True)
     nickname = db.Column(db.String(64), nullable=False)
-    sugg = db.relationship('Suggestion', secondary=user_sugg,
-                            backref=db.backref('users', lazy='dynamic'))
-
 
 class SuggestionMixin(object):
 
@@ -61,6 +53,7 @@ class SuggestionMixin(object):
 class Suggestion(SuggestionMixin, db.Model):
     __tablename__ = 'suggestions'
     id =  db.Column(db.Integer, primary_key=True)
+    social_id = db.Column(db.String(64), nullable=False)
     mood = db.Column(db.String(255))
     sugg1 = db.Column(db.String(255), unique=True) 
     sugg2 = db.Column(db.String(255), unique=True) 
@@ -138,7 +131,7 @@ def User_Action(mood):
             titles += dataj['results'][randomnums[i]]['original_title'] + ", "
             suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
 
-        suggestions = Suggestion(mood= mood, sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
+        suggestions = Suggestion(mood= mood, social_id=current_user.nickname, sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
         db.session.add(suggestions)
         db.session.commit()
         print(suggestionLst)
@@ -180,10 +173,6 @@ def tested():
         print(e.args)
 
 
-@app.route("/testupload/")
-def randtest():
-    return render_template('upload.html')
-
 @app.route("/EnterURLmovie/", methods=["POST", "GET"])
 def testedmovie():
 
@@ -224,12 +213,29 @@ def testedmovie():
 
     print(dictemotions)
     mood = (max(dictemotions, key=dictemotions.get))
-    print(mood)
     return User_Action(mood)
 
+@app.route("/pastRecs/", methods=["POST","GET"])
+def test():
+    ordered = Suggestion.query.order_by(Suggestion.id.desc())
+    filtered = ordered.filter_by(social_id = current_user.nickname).limit(5)
+    #Suggestion.query.filter_by(social_id = current_user.nickname)
+    
+    sugg1Lst = []
+    for row in filtered:
+        sugg1Lst.append(row.mood)
+        sugg1Lst.append(row.sugg1)
+        sugg1Lst.append(row.sugg2)
+        sugg1Lst.append(row.sugg3)
+        sugg1Lst.append(row.sugg4)
+        sugg1Lst.append(row.sugg5)
 
+
+
+    return render_template("pastRecs.html", message=sugg1Lst)
 
 
 if __name__ == '__main__':
+    #db.drop_all()
     db.create_all()
     app.run(debug=True)
