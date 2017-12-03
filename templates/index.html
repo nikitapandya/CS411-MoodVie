@@ -16,20 +16,25 @@
             <p><a href="{{ url_for('oauth_authorize', provider='twitter') }}">Login with Twitter</a></p>
     {% endif %}
 
-    <h2> Type the genre you would like to see! </h2>
+    <!--<h2> Type the genre you would like to see! </h2>
         <form action="/User_Action/" method="post">
             <input type="text" name="Genre"/><br>
             <input type="submit" value="Enter">
-        </form>
+        </form>-->
 
-    <h2> Enter a URL of a photo! </h2>
+
+       <h2> Enter a URL of a photo and get movies! </h2>
     <h4>Acceptable extensions:  'png', 'jpg', 'jpeg', 'gif'</h4>
-        <form action="/EnterURL/" method="post">
+        <form action="/EnterURLmovie/" method="post">
             <input type="text" name="url">
             <input type=submit value="Enter a URL">
         </form>
 
-        <table>
+    <b>{{ error }}</b>
+
+
+
+        <!--<table>
         <tr>
             <th>Genre Name</th>
             <th>ID</th>
@@ -110,8 +115,7 @@
             <td>37</td>
             <td>Western</td>
         </tr>
-    </table>
-
+    </table>-->
     </div>
 
 

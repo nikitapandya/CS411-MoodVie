@@ -46,7 +46,7 @@ def load_user(id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', error = "")
 
 
 @app.route('/logout')
@@ -187,17 +187,20 @@ def testedmovie():
             "sadness": 0, "surprise": 0 }
 
     datajson = json.loads(data.decode())
-    for i in range(len(datajson)):
-        emotions = (datajson[i]['scores'])
+    try:
+        for i in range(len(datajson)):
+            emotions = (datajson[i]['scores'])
 
         for key, value in dictemotions.items():
             dictemotions[key] += emotions[key]
 
-    print(dictemotions)
-    mood = (max(dictemotions, key=dictemotions.get))
-    print(mood)
-    return User_Action(mood)
+        print(dictemotions)
+        mood = (max(dictemotions, key=dictemotions.get))
+        print(mood)
+        return User_Action(mood)
 
+    except Exception as e:
+        return render_template('index.html', error = "Invalid URL. Please try again.")
 
 
 
