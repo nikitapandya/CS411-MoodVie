@@ -1,41 +1,120 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
+
 <head> <title> Welcome To Moodvie! </title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="./../static/styles/css/main.css" />
+
+    <style>
+        #three {
+            padding-top: 1em;
+        }
+
+    </style>
 
 </head>
 <body>
 
-    {% for message in get_flashed_messages() %}
-            <p><b>Error</b>: {{ message }}</p>
-        {% endfor %}
-        {% if current_user.is_authenticated %}
-            <h2>Hi, {{ current_user.nickname }}!</h2>
-            <p><a href="{{ url_for('logout') }}">Logout</a></p>
-        {% else %}
-            <h2>I don't know you!</h2>
+    <header id="header">
+        <div class="inner">
+            <a href="index.html" class="logo">Moodvie</a>
+        </div>
+    </header>
 
-            <p><a href="{{ url_for('oauth_authorize', provider='twitter') }}">Login with Twitter</a></p>
+    <section id="banner">
+        <div class="inner">
+            <h1>Moodvie: <span>Movie Recommendations<br /> based on your mood</span></h1>
+        </div>
+    </section>
+
+
+    {% for message in get_flashed_messages() %}
+        <p><b>Error</b>: {{ message }}</p>
+    {% endfor %}
+    {% if current_user.is_authenticated %}
+
+        <section id="one">
+            <div class="inner">
+                <header>
+                    <h2>Hi, {{ current_user.nickname }}!</h2>
+                </header>
+                <p>What is Moodvie? When it is movie night and you don’t know what to watch… snap a selfie and let your mood decide! Upload your selfie to our website and using Microsoft’s Emotion API and the Netflix API, we will recommend the perfect movie or TV show to go with your mood, like a comedy when you’re happy or an action movie when you’re angry.</p>
+                <ul class="actions">
+                    <li><a class="button alt" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Options to enter URL/Upload/Past Recs -->
+        <section id="three">
+            <div class="inner">
+                <article>
+                    <div class="content">
+                        <span class="icon fa-smile-o"></span>
+                        <header>
+                            <h3>Enter a URL of a photo and get movies!</h3>
+                            <h5>Acceptable extensions:  'png', 'jpg', 'jpeg', 'gif'</h5>
+                        </header>
+
+                        <form action="/EnterURLmovie/" method="post">
+                            <input type="text" name="url">
+                            <input class="button alt" type=submit value="Enter a URL">
+                         </form>
+                    </div>
+                </article>
+                <article>
+                    <div class="content">
+                        <span class="icon fa-cloud"></span>
+                        <header>
+                            <h3>Don't have an URL? Upload a photo right now!</h3>
+                        </header>
+                           <form action="/upload/" method="get">
+                                <input class="button alt" type=submit value="Upload">
+                            </form>
+                    </div>
+                </article>
+                <article>
+                <div class="content">
+                        <span class="icon fa-clock-o"></span>
+                        <header>
+                            <h3>Your Previous Recommendations</h3>
+                        </header>
+                        <form action="/pastRecs/" method="get">
+                            <input class="button alt" type=submit value="Past">
+                        </form>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+
+        <b>{{ error }}</b>
+
+
+    {% else %}
+
+        <section id="one">
+            <div class="inner">
+                <header>
+                    <h2>I don't know you!</h2>
+                </header>
+                <p>What is Moodvie? When it is movie night and you don’t know what to watch… snap a selfie and let your mood decide! Upload your selfie to our website and using Microsoft’s Emotion API and the Netflix API, we will recommend the perfect movie or TV show to go with your mood, like a comedy when you’re happy or an action movie when you’re angry.</p>
+                <ul class="actions">
+                    <li><a class="button alt" href="{{ url_for('oauth_authorize', provider='twitter') }}">Login with Twitter</a></li>
+                </ul>
+            </div>
+        </section>
+        
     {% endif %}
 
-       <h2> Enter a URL of a photo and get movies! </h2>
-         <h4>Acceptable extensions:  'png', 'jpg', 'jpeg', 'gif'</h4>
-            <form action="/EnterURLmovie/" method="post">
-                <input type="text" name="url">
-                <input type=submit value="Enter a URL">
-            </form>
+<script src="./../static/styles/js/jquery.min.js"></script>
+<script src="./../static/styles/js/skel.min.js"></script>
+<script src="./../static/styles/js/util.js"></script>
+<script src="./../static/styles/js/main.js"></script>
 
-      <form action="/pastRecs/" method="get">
-            <input type=submit value="Past">
-      </form>
-
-      <b>{{ error }}</b>
-  
-    <p>Don't have an URL? Upload a photo right now!<br>
-    <form action="/upload/" method="get">
-            <input type=submit value="Upload">
-      </form>
-    </p>
 
 </body>
 
 </html>
+

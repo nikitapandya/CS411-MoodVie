@@ -1,17 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload Photo</title>
+<!DOCTYPE html> 
+<html>
+
+<head> <title> Welcome To Moodvie! </title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="./../static/styles/css/main.css" />
+
+    <style>
+        #three {
+            padding-top: 1em;
+        }
+
+    </style>
+
 </head>
 <body>
-    <div class="title">
-            <h1>Upload a photo to get recommendations!</h1>
-    </div>
-            <form method="post" enctype="multipart/form-data" action="/uploadImage/">
+
+    
+    <header id="header">
+        <div class="inner">
+                <a href="index.html" class="logo">Moodvie</a>
+               <nav id="nav">
+                 <form action="/index/" method="get">
+                     <input style="background-color:#1c1c1c" type=submit value="Home">
+                </form>
+               </nav>
+            </div>
+         </header>
+
+    <section id="banner">
+        <div class="inner">
+            <h1>Moodvie: <span>Movie Recommendations<br /> based on your mood</span></h1>
+        </div>
+    </section>
+
+
+    <section id="one">
+            <div class="inner">
+                <header>
+                    <h2>Upload a photo to get recommendations!</h2>
+                </header>
+
+                <form method="post" enctype="multipart/form-data" action="/uploadImage/">
                 <label for="photo">Select photo:</label>
                 <input type="file" name="photo" required/><br />
-                <input type="submit" value="upload" />
-            </form>
+                <input class="button alt" type="submit" value="upload" />
+                </form>
+            </div>
+        </section>
+
+
 </body>
 </html>

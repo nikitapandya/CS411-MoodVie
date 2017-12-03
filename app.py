@@ -88,19 +88,19 @@ class Suggestion(SuggestionMixin, db.Model):
     mood = db.Column(db.String(255))
     sugg1 = db.Column(db.String(255), unique=True)
     poster1 = db.Column(db.String(255), unique=True)
-    oView1 = db.Column(db.String(1024), unique=True)
+    oView1 = db.Column(db.VARCHAR, unique=True)
     sugg2 = db.Column(db.String(255), unique=True) 
     poster2 = db.Column(db.String(255), unique=True)
-    oView2 = db.Column(db.String(1024), unique=True)
+    oView2 = db.Column(db.VARCHAR, unique=True)
     sugg3 = db.Column(db.String(255), unique=True) 
     poster3 = db.Column(db.String(255), unique=True)
-    oView3 = db.Column(db.String(1024), unique=True)
+    oView3 = db.Column(db.VARCHAR, unique=True)
     sugg4 = db.Column(db.String(255), unique=True)
     poster4 = db.Column(db.String(255), unique=True)
-    oView4 = db.Column(db.String(1024), unique=True)
-    sugg5 = db.Column(db.String(255), unique=True) 
+    oView4 = db.Column(db.VARCHAR, unique=True)
+    sugg5 = db.Column(db.String(255), unique=True)
     poster5 = db.Column(db.String(255), unique=True)
-    oView5 = db.Column(db.String(1024), unique=True)
+    oView5 = db.Column(db.VARCHAR, unique=True)
 
 @lm.user_loader
 def load_user(id):
@@ -116,6 +116,11 @@ def index():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/index/')
+def back():
+    return render_template('index.html')
 
 
 @app.route('/authorize/<provider>')
@@ -241,7 +246,6 @@ def tested():
         return data
     except Exception as e:
         print(e.args)
-
 
 @app.route("/EnterURLmovie/", methods=["POST", "GET"])
 def testedmovie():
