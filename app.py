@@ -55,11 +55,21 @@ class Suggestion(SuggestionMixin, db.Model):
     id =  db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=False)
     mood = db.Column(db.String(255))
-    sugg1 = db.Column(db.String(255), unique=True) 
+    sugg1 = db.Column(db.String(255), unique=True)
+    poster1 = db.Column(db.String(255), unique=True)
+    oView1 = db.Column(db.String(1024), unique=True)
     sugg2 = db.Column(db.String(255), unique=True) 
+    poster2 = db.Column(db.String(255), unique=True)
+    oView2 = db.Column(db.String(1024), unique=True)
     sugg3 = db.Column(db.String(255), unique=True) 
-    sugg4 = db.Column(db.String(255), unique=True) 
+    poster3 = db.Column(db.String(255), unique=True)
+    oView3 = db.Column(db.String(1024), unique=True)
+    sugg4 = db.Column(db.String(255), unique=True)
+    poster4 = db.Column(db.String(255), unique=True)
+    oView4 = db.Column(db.String(1024), unique=True)
     sugg5 = db.Column(db.String(255), unique=True) 
+    poster5 = db.Column(db.String(255), unique=True)
+    oView5 = db.Column(db.String(1024), unique=True)
 
 @lm.user_loader
 def load_user(id):
@@ -122,6 +132,8 @@ def User_Action(mood):
         titles = ""
         randomnums = []
         suggestionLst = []
+        posterlist = []
+        overviewlist = []
 
         while len(randomnums) < 5:
             randindex = random.randint(0,19)
@@ -130,13 +142,18 @@ def User_Action(mood):
         for i in range(5):
             titles += dataj['results'][randomnums[i]]['original_title'] + ", "
             suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
+            posterlist.append("http://image.tmdb.org/t/p/w185" + dataj['results'][randomnums[i]]['poster_path'])
+            overviewlist.append(dataj['results'][randomnums[i]]['overview'])
 
-        suggestions = Suggestion(mood= mood, social_id=current_user.nickname, sugg1=suggestionLst[0], sugg2=suggestionLst[1], sugg3=suggestionLst[2], sugg4=suggestionLst[3], sugg5=suggestionLst[4])
+        suggestions = Suggestion(mood= mood, social_id=current_user.nickname, 
+            sugg1=suggestionLst[0], poster1=posterlist[0], oView1=overviewlist[0],
+            sugg2=suggestionLst[1], poster2=posterlist[1], oView2=overviewlist[1],
+            sugg3=suggestionLst[2], poster3=posterlist[2], oView3=overviewlist[2],
+            sugg4=suggestionLst[3], poster4=posterlist[3], oView4=overviewlist[3],
+            sugg5=suggestionLst[4], poster5=posterlist[4], oView5=overviewlist[4])
+        
         db.session.add(suggestions)
         db.session.commit()
-        print(suggestionLst)
-        print(suggestions)
-        print(Suggestion.query.first())
 
         return titles[:-2]
 
@@ -220,22 +237,47 @@ def test():
     ordered = Suggestion.query.order_by(Suggestion.id.desc())
     filtered = ordered.filter_by(social_id = current_user.nickname).limit(5)
     #Suggestion.query.filter_by(social_id = current_user.nickname)
-    
+
+    message = "" 
     sugg1Lst = []
-    for row in filtered:
-        sugg1Lst.append(row.mood)
-        sugg1Lst.append(row.sugg1)
-        sugg1Lst.append(row.sugg2)
-        sugg1Lst.append(row.sugg3)
-        sugg1Lst.append(row.sugg4)
-        sugg1Lst.append(row.sugg5)
+    moodLst = [] 
+    posterLst = [] 
+    overviewLst = [] 
 
+    if (ordered is None):
+        message = "You have no past recomendations"
+    
+    else:   
+        for row in filtered:
+            moodLst.append(row.mood)
+            sugg1Lst.append(row.sugg1)
+            posterLst.append(row.poster1)
+            overviewLst.append(row.oView1)
+            sugg1Lst.append(row.sugg2)
+            posterLst.append(row.poster2)
+            overviewLst.append(row.oView2)
+            sugg1Lst.append(row.sugg3)
+            posterLst.append(row.poster3)
+            overviewLst.append(row.oView3)
+            sugg1Lst.append(row.sugg4)
+            posterLst.append(row.poster4)
+            overviewLst.append(row.oView4)
+            sugg1Lst.append(row.sugg5)
+            posterLst.append(row.poster5)
+            overviewLst.append(row.oView5)
 
+        print(sugg1Lst)
 
-    return render_template("pastRecs.html", message=sugg1Lst)
+        if (len(sugg1Lst) == 0 or len(posterLst) == 0 or len(overviewLst) == 0): 
+            return render_template("pastRecs.html", 
+                message="", messageP="", message2="", messageO="")
+
+    return render_template("pastRecs.html", message=moodLst, 
+        messageP=posterLst, 
+        message2=sugg1Lst, 
+        messageO=overviewLst)
 
 
 if __name__ == '__main__':
-    #db.drop_all()
     db.create_all()
     app.run(debug=True)
