@@ -23,7 +23,7 @@
                 <input type="text" name="url">
                 <input type=submit value="Enter a URL">
             </form>
-  
+
       <form action="/pastRecs/" method="get">
             <input type=submit value="Past">
       </form>
@@ -31,7 +31,9 @@
       <b>{{ error }}</b>
   
     <p>Don't have an URL? Upload a photo right now!<br>
-        <a href="upload">Upload now</a>
+    <form action="/upload/" method="get">
+            <input type=submit value="Upload">
+      </form>
     </p>
 
 </body>
