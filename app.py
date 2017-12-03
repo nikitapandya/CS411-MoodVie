@@ -6,6 +6,7 @@ import urllib.request, urllib.parse, urllib.error, base64, sys
 import json
 import random
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declared_attr
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
 from secret import Secret
@@ -87,19 +88,19 @@ class Suggestion(SuggestionMixin, db.Model):
     mood = db.Column(db.String(255))
     sugg1 = db.Column(db.String(255), unique=True)
     poster1 = db.Column(db.String(255), unique=True)
-    oView1 = db.Column(db.String(1024), unique=True)
+    oView1 = db.Column(db.VARCHAR, unique=True)
     sugg2 = db.Column(db.String(255), unique=True) 
     poster2 = db.Column(db.String(255), unique=True)
-    oView2 = db.Column(db.String(1024), unique=True)
+    oView2 = db.Column(db.VARCHAR, unique=True)
     sugg3 = db.Column(db.String(255), unique=True) 
     poster3 = db.Column(db.String(255), unique=True)
-    oView3 = db.Column(db.String(1024), unique=True)
+    oView3 = db.Column(db.VARCHAR, unique=True)
     sugg4 = db.Column(db.String(255), unique=True)
     poster4 = db.Column(db.String(255), unique=True)
-    oView4 = db.Column(db.String(1024), unique=True)
-    sugg5 = db.Column(db.String(255), unique=True) 
+    oView4 = db.Column(db.VARCHAR, unique=True)
+    sugg5 = db.Column(db.String(255), unique=True)
     poster5 = db.Column(db.String(255), unique=True)
-    oView5 = db.Column(db.String(1024), unique=True)
+    oView5 = db.Column(db.VARCHAR, unique=True)
 
 @lm.user_loader
 def load_user(id):
@@ -115,6 +116,11 @@ def index():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/index/')
+def back():
+    return render_template('index.html')
 
 
 @app.route('/authorize/<provider>')

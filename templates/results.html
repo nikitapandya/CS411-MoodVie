@@ -1,68 +1,113 @@
+<!DOCTYPE html> 
 <html>
+
 <head> <title> Moodvie Results </title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="./../static/styles/css/main.css" />
+
+
+<style> 
+
+    img { 
+        max-width: 50%;
+    }
+
+    #two {
+        padding: 2em 0;
+    }
+
+</style> 
 
 </head>
 <body>
 
-<center>
-    <h1> It looks like you are feeling {{ mood }}! <br>
-        Here are some {{ genre }} movies.</h1>
+    <header id="header">
+        <div class="inner">
+                <a href="index.html" class="logo">Moodvie</a>
+               <nav id="nav">
+                 <form action="/index/" method="get">
+                     <input style="background-color:#1c1c1c" type=submit value="Home">
+                </form>
+               </nav>
+            </div>
+         </header>
 
-<div>
-    <img src = {{ posterlist[0] }}>
-    <p><b>{{ suggestionlist[0] }}</b></p>
-    <p>{{ overviewlist[0] }}</p>
-
-    <br>
-    <br>
-</div>
-
-<div class = "suggestion">
-    <img src = {{ posterlist[1] }}>
-    <p><b>{{ suggestionlist[1] }}</b></p>
-    <p>{{ overviewlist[1] }}</p>
-    <br>
-    <br>
-</div>
-
-<div class = "suggestion">
-    <img src = {{ posterlist[2] }}>
-    <p><b>{{ suggestionlist[2] }}</b></p>
-    <p>{{ overviewlist[2] }}</p>
-
-    <br>
-    <br>
-</div>
-
-<div class = "suggestion">
-    <img src = {{ posterlist[3] }}>
-    <p><b>{{ suggestionlist[3] }}</b></p>
-    <p>{{ overviewlist[3] }}</p>
-
-    <br>
-    <br>
-</div>
-
-<div class = "suggestion">
-    <img src = {{ posterlist[4] }}>
-    <p><b>{{ suggestionlist[4] }}</b></p>
-    <p>{{ overviewlist[4] }}</p>
-
-    <br>
-    <br>
-</div>
-
-<div class = "suggestion">
-    <img src = {{ posterlist[5] }}>
-    <p><b>{{ suggestionlist[5] }}</b></p>
-    <p>{{ overviewlist[5] }}</p>
+<!-- heading -->
+    <section id="one">
+        <div class="inner">
+            <header>
+                 <h1> It looks like you are feeling {{ mood }}! <br>  Here are some {{ genre }} movies.</h1>
+            </header>
+            </div>
+     </section>
 
 
-    <br>
-    <br>
+    <section id="two">
+        <div class="inner">
+            <article>
+                <div class="content">
+                    <header>
+                        <h3>{{ suggestionlist[0] }}</h3>
+                    </header>
+                    <div class="image fit">
+                         <img src = {{ posterlist[0] }}>
+                    </div>
+                    <p>{{ overviewlist[0] }}</p>
+                </div>
+            </article>
+            <article class="alt">
+                <div class="content">
+                    <header>
+                        <h3>{{ suggestionlist[1] }}</h3>
+                    </header>
+                    <div class="image fit">
+                        <img src = {{ posterlist[1] }}>
+                    </div>
+                    <p>{{ overviewlist[1] }}</p>
+                </div>
+            </article>
+        </div>
+    </section>
+    <section id="two">
+        <div class="inner">
+            <article>
+                <div class="content">
+                    <header>
+                        <h3>{{ suggestionlist[2] }}</h3>
+                    </header>
+                    <div class="image fit">
+                         <img src = {{ posterlist[2] }}>
+                    </div>
+                    <p>{{ overviewlist[2] }}</p>
+                </div>
+            </article>
+            <article class="alt">
+                <div class="content">
+                    <header>
+                        <h3>{{ suggestionlist[3] }}</h3>
+                    </header>
+                    <div class="image fit">
+                        <img src = {{ posterlist[3] }}>
+                    </div>
+                    <p>{{ overviewlist[3] }}</p>
+                </div>
+            </article>
+        </div>
+    </section>
 
-</div>
-</center>
+    <section id="one">
+    <div class="inner">
+        <header>
+             <h1> {{ suggestionlist[4] }}</h1>
+        </header>
+        <div class=" fit">
+            <img style="max-width: 50%" src = {{ posterlist[4] }}>
+        </div>
+        <p>{{ overviewlist[4] }}</p>
+        </div>
+     </section>
+
 </body>
 
 </html>
