@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head> <title> Welcome To Moodvie! </title>
+
+</head>
+<body>
+
+	{% if message|length == 1 %}
+		<h1> Here is your previous suggestion <h1>
+			<h2> Your previous mood was: {{message[0]}} </h2> 
+			    <p> {{message2[0]}} </p> 
+			    <img src = {{ messageP[0]}}>
+			    <p> {{messageO[0]}} </p> 
+
+			    <p> {{message2[1]}} </p> 
+			    <img src = {{ messageP[1]}}>
+			    <p> {{messageO[1]}} </p> 
+
+			    <p> {{message2[2]}} </p> 
+			    <img src = {{ messageP[2]}}>
+			    <p> {{messageO[2]}} </p> 
+
+			    <p> {{message2[3]}} </p> 
+			    <img src = {{ messageP[3]}}>
+			    <p> {{messageO[3]}} </p> 
+
+			    <p> {{message2[4]}} </p> 
+			    <img src = {{ messageP[4]}}>
+			    <p> {{messageO[4]}} </p> 
+
+	{% elif message|length >= 2 %}
+		<h1> Here is your previous suggestion <h1>
+			<h2> Your previous mood was: {{message[0]}} </h2> 
+			    <p> {{message2[0]}} </p> 
+			    <img src = {{ messageP[0]}}>
+			    <p> {{messageO[0]}} </p> 
+
+			    <p> {{message2[1]}} </p> 
+			    <img src = {{ messageP[1]}}>
+			    <p> {{messageO[1]}} </p> 
+
+			    <p> {{message2[2]}} </p> 
+			    <img src = {{ messageP[2]}}>
+			    <p> {{messageO[2]}} </p> 
+
+			    <p> {{message2[3]}} </p> 
+			    <img src = {{ messageP[3]}}>
+			    <p> {{messageO[3]}} </p> 
+
+			    <p> {{message2[4]}} </p> 
+			    <img src = {{ messageP[4]}}>
+			    <p> {{messageO[4]}} </p> 
+
+			    <h2> Your previous mood was: {{message[1]}} </h2> 
+			    <p> {{message2[5]}} </p> 
+			    <img src = {{ messageP[5]}}>
+			    <p> {{messageO[5]}} </p> 
+
+			    <p> {{message2[6]}} </p> 
+			    <img src = {{ messageP[6]}}>
+			    <p> {{messageO[6]}} </p> 
+
+			    <p> {{message2[7]}} </p> 
+			    <img src = {{ messageP[7]}}>
+			    <p> {{messageO[7]}} </p> 
+
+			    <p> {{message2[8]}} </p> 
+			    <img src = {{ messageP[8]}}>
+			    <p> {{messageO[8]}} </p> 
+
+			    <p> {{message2[9]}} </p> 
+			    <img src = {{ messageP[9]}}>
+			    <p> {{messageO[9]}} </p>
+
+	{% else %}
+		<h2>You don't have any recommendations yet!</h2>
+	{% endif %}
+
+
+
+</body>
+
+</html>

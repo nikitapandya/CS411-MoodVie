@@ -6,9 +6,13 @@ import urllib.request, urllib.parse, urllib.error, base64, sys
 import json
 import random
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declared_attr
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
 from secret import Secret
+from sqlalchemy import desc
+from sqlalchemy.orm import relationship
+
 import boto3
 from boto.s3.key import Key
 from werkzeug.utils import secure_filename
@@ -61,14 +65,42 @@ db = SQLAlchemy(app)
 lm = LoginManager(app)
 lm.login_view = 'index'
 
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     social_id = db.Column(db.String(64), nullable=False, unique=True)
     nickname = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True)
 
+class SuggestionMixin(object):
+
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+    __table_args__ = {'mysql_engine': 'InnoDB'}
+    __mapper_args__= {'always_refresh': True}
+
+
+class Suggestion(SuggestionMixin, db.Model):
+    __tablename__ = 'suggestions'
+    id =  db.Column(db.Integer, primary_key=True)
+    social_id = db.Column(db.String(64), nullable=False)
+    mood = db.Column(db.String(255))
+    sugg1 = db.Column(db.String(255), unique=True)
+    poster1 = db.Column(db.String(255), unique=True)
+    oView1 = db.Column(db.String(1024), unique=True)
+    sugg2 = db.Column(db.String(255), unique=True) 
+    poster2 = db.Column(db.String(255), unique=True)
+    oView2 = db.Column(db.String(1024), unique=True)
+    sugg3 = db.Column(db.String(255), unique=True) 
+    poster3 = db.Column(db.String(255), unique=True)
+    oView3 = db.Column(db.String(1024), unique=True)
+    sugg4 = db.Column(db.String(255), unique=True)
+    poster4 = db.Column(db.String(255), unique=True)
+    oView4 = db.Column(db.String(1024), unique=True)
+    sugg5 = db.Column(db.String(255), unique=True) 
+    poster5 = db.Column(db.String(255), unique=True)
+    oView5 = db.Column(db.String(1024), unique=True)
 
 @lm.user_loader
 def load_user(id):
@@ -99,13 +131,13 @@ def oauth_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('index'))
     oauth = OAuthSignIn.get_provider(provider)
-    social_id, username, email = oauth.callback()
+    social_id, username = oauth.callback()
     if social_id is None:
         flash('Authentication failed.')
         return redirect(url_for('index'))
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
-        user = User(social_id=social_id, nickname=username, email=email)
+        user = User(social_id=social_id, nickname=username)
         db.session.add(user)
         db.session.commit()
     login_user(user, True)
@@ -116,6 +148,7 @@ def oauth_callback(provider):
 def User_Action(mood):
     mooddict = {"anger": ["28", "12"], "contempt": ["27"], "disgust": ["16","99"], "fear": ["10749"], "happiness": ["35", "10402"],"neutral": ["80", "878"], "sadness": ["12"], "surprise": ["53","14","9648"]}
     text1 = mooddict[mood]
+    #print("Text1: " + text1)
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
     randompage = random.randint(1,20)
@@ -159,8 +192,17 @@ def User_Action(mood):
                 i += 1
                 print("EXCEPTION")
                 continue
-
-
+                
+        suggestions = Suggestion(mood= mood, social_id=current_user.nickname, 
+            sugg1=suggestionLst[0], poster1=posterlist[0], oView1=overviewlist[0],
+            sugg2=suggestionLst[1], poster2=posterlist[1], oView2=overviewlist[1],
+            sugg3=suggestionLst[2], poster3=posterlist[2], oView3=overviewlist[2],
+            sugg4=suggestionLst[3], poster4=posterlist[3], oView4=overviewlist[3],
+            sugg5=suggestionLst[4], poster5=posterlist[4], oView5=overviewlist[4])
+        
+        db.session.add(suggestions)
+        db.session.commit()
+        
         # return titles[:-2]
         return getResults(suggestionLst, posterlist, overviewlist, mood, genre)
     except Exception as e:
@@ -199,6 +241,7 @@ def tested():
         return data
     except Exception as e:
         print(e.args)
+
 
 @app.route("/EnterURLmovie/", methods=["POST", "GET"])
 def testedmovie():
@@ -298,9 +341,54 @@ def testedmovie_image(url):
 
     print(dictemotions)
     mood = (max(dictemotions, key=dictemotions.get))
-    print(mood)
     return User_Action(mood)
 
+
+@app.route("/pastRecs/", methods=["POST","GET"])
+def test():
+    ordered = Suggestion.query.order_by(Suggestion.id.desc())
+    filtered = ordered.filter_by(social_id = current_user.nickname).limit(5)
+    #Suggestion.query.filter_by(social_id = current_user.nickname)
+
+    message = "" 
+    sugg1Lst = []
+    moodLst = [] 
+    posterLst = [] 
+    overviewLst = [] 
+
+    if (ordered is None):
+        message = "You have no past recomendations"
+    
+    else:   
+        for row in filtered:
+            moodLst.append(row.mood)
+            sugg1Lst.append(row.sugg1)
+            posterLst.append(row.poster1)
+            overviewLst.append(row.oView1)
+            sugg1Lst.append(row.sugg2)
+            posterLst.append(row.poster2)
+            overviewLst.append(row.oView2)
+            sugg1Lst.append(row.sugg3)
+            posterLst.append(row.poster3)
+            overviewLst.append(row.oView3)
+            sugg1Lst.append(row.sugg4)
+            posterLst.append(row.poster4)
+            overviewLst.append(row.oView4)
+            sugg1Lst.append(row.sugg5)
+            posterLst.append(row.poster5)
+            overviewLst.append(row.oView5)
+
+        print(sugg1Lst)
+
+        if (len(sugg1Lst) == 0 or len(posterLst) == 0 or len(overviewLst) == 0): 
+            return render_template("pastRecs.html", 
+                message="", messageP="", message2="", messageO="")
+
+    return render_template("pastRecs.html", message=moodLst, 
+        messageP=posterLst, 
+        message2=sugg1Lst, 
+        messageO=overviewLst)
+  
 @app.route("/uploadImage/", methods=['POST', 'GET'])
 def uploadFile():
     if request.method == 'POST':
@@ -318,8 +406,7 @@ def uploadFile():
             print(file_url)
             return testedmovie_image(file_url)
     return ""
-
-
+  
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
