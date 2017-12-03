@@ -106,8 +106,10 @@ def User_Action(mood):
         posterlist = []
         overviewlist = []
 
-        for i in range(10):
-            randomnums.append(random.randint(0,20))
+        while len(randomnums) < 10:
+            randindex = random.randint(0, 19)
+            if randindex not in randomnums:
+                randomnums.append(randindex)
 
         count = 0
         i = 0
