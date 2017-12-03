@@ -11,8 +11,39 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from oauth import OAuthSignIn
 from secret import Secret
 from sqlalchemy import desc
-
 from sqlalchemy.orm import relationship
+
+import boto3
+from boto.s3.key import Key
+from werkzeug.utils import secure_filename
+import uuid
+
+app = Flask(__name__)
+app.config['akey'] = Secret.AWS_ACCESS_KEY_ID
+app.config['sKey'] = Secret.AWS_SECRET_ACCESS_KEY
+app.config['bucket'] = 'cs411photo'
+
+def enviroment(filename):
+    # Create an S3 client
+    s3 = boto3.client('s3')
+
+    # Create the configuration for the website
+    website_configuration = {
+        'ErrorDocument': {'Key': 'error.html'},
+        'IndexDocument': {'Suffix': 'index.html'},
+    }
+
+    # Set the new policy on the selected bucket
+    s3.put_bucket_website(
+        Bucket='my-bucket',
+        WebsiteConfiguration=website_configuration
+    )
+
+def saveFileToS3(bucket, path, filename):
+    s3 = boto3.resource('s3')
+    data = open(path + "/" + filename, 'rb')
+    s3.Bucket(bucket).put_object(Key=filename, Body=data, ACL='public-read')
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
@@ -78,7 +109,7 @@ def load_user(id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', error = "")
 
 
 @app.route('/logout')
@@ -113,38 +144,55 @@ def oauth_callback(provider):
     return redirect(url_for('index'))
 
 @app.route("/User_Action/", methods=["POST", "GET"])
+
 def User_Action(mood):
     mooddict = {"anger": ["28", "12"], "contempt": ["27"], "disgust": ["16","99"], "fear": ["10749"], "happiness": ["35", "10402"],"neutral": ["80", "878"], "sadness": ["12"], "surprise": ["53","14","9648"]}
     text1 = mooddict[mood]
     #print("Text1: " + text1)
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
-    randompage = random.randint(1,301)
-    #print("Text:" + text)
+    randompage = random.randint(1,20)
+    genredict = {"28": "Action", "12": "Adventure", "16": "Animation", "35": "Comedy", "80": "Crime", "99": "Documentary",
+            "18": "Drama", "10751": "Family", "14": "Fantasy", "36": "History", "27": "Horror", "10402": "Music",
+             "9648": "Mystery", "10749": "Romance", "878": "Science Fiction", "10770": "TV Movie", "53": "Thriller",
+             "10752": "War", "37": "Western"}
     #text = request.form["Genre"]
+    genre = genredict[str(text)]
     payload = "{}"
     try:
-        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&sort_by=popularity.desc&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
         res = conn.getresponse()
         data = res.read()
-        dataj = json.loads(data.decode()) 
-
+        dataj = json.loads(data.decode())
         titles = ""
         randomnums = []
         suggestionLst = []
         posterlist = []
         overviewlist = []
 
-        while len(randomnums) < 5:
-            randindex = random.randint(0,19)
+        while len(randomnums) < 10:
+            randindex = random.randint(0, 19)
             if randindex not in randomnums:
                 randomnums.append(randindex)
-        for i in range(5):
-            titles += dataj['results'][randomnums[i]]['original_title'] + ", "
-            suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
-            posterlist.append("http://image.tmdb.org/t/p/w185" + dataj['results'][randomnums[i]]['poster_path'])
-            overviewlist.append(dataj['results'][randomnums[i]]['overview'])
 
+        count = 0
+        i = 0
+        while count < 5:
+            try:
+                thissuggestion = dataj['results'][randomnums[i]]['original_title']
+                thisposter = dataj['results'][randomnums[i]]['poster_path']
+                thisoverview = dataj['results'][randomnums[i]]['overview']
+                suggestionLst.append(thissuggestion)
+                posterlist.append("http://image.tmdb.org/t/p/w185" + thisposter)
+                overviewlist.append(thisoverview)
+                i += 1
+                count += 1
+
+            except Exception as e:
+                i += 1
+                print("EXCEPTION")
+                continue
+                
         suggestions = Suggestion(mood= mood, social_id=current_user.nickname, 
             sugg1=suggestionLst[0], poster1=posterlist[0], oView1=overviewlist[0],
             sugg2=suggestionLst[1], poster2=posterlist[1], oView2=overviewlist[1],
@@ -154,11 +202,16 @@ def User_Action(mood):
         
         db.session.add(suggestions)
         db.session.commit()
-
-        return titles[:-2]
-
+        
+        # return titles[:-2]
+        return getResults(suggestionLst, posterlist, overviewlist, mood, genre)
     except Exception as e:
-        print(e.args) 
+        print(e.args)
+
+def getResults(suggestionlist, posterlist, overviewlist, mood, genre):
+    return render_template('results.html', suggestionlist = suggestionlist, posterlist = posterlist,
+                           overviewlist = overviewlist, mood = mood, genre = genre)
+
 
 @app.route("/EnterURL/", methods=["POST", "GET"])
 def tested():
@@ -222,6 +275,64 @@ def testedmovie():
             "sadness": 0, "surprise": 0 }
 
     datajson = json.loads(data.decode())
+    try:
+        for i in range(len(datajson)):
+            emotions = (datajson[i]['scores'])
+
+        for key, value in dictemotions.items():
+            dictemotions[key] += emotions[key]
+
+        print(dictemotions)
+        mood = (max(dictemotions, key=dictemotions.get))
+        print(mood)
+        return User_Action(mood)
+
+    except Exception as e:
+        return render_template('index.html', error = "Invalid URL. Please try again.")
+
+#upload
+UPLOAD_FOLDER = '/Users/ruochen/desktop/UPLOAD'
+ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route("/upload/")
+def upload():
+    return render_template("upload.html")
+
+def testedmovie_image(url):
+
+    text = url
+    print(text)
+
+    headers = {
+    'Content-Type': 'application/json',
+    'Ocp-Apim-Subscription-Key': Secret.microsoftsecret,
+    }
+
+    params = urllib.parse.urlencode({
+    })
+
+    body = "{ 'url': '" + text + "' }"
+    print(body)
+
+    payload = "{}"
+    try:
+        conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
+        conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
+        res = conn.getresponse()
+        data = res.read()
+        # print(data)
+        conn.close()
+    except Exception as e:
+        print(e.args)
+
+    dictemotions = {"anger": 0, "contempt": 0, "disgust": 0, "fear": 0, "happiness": 0, "neutral":0,
+            "sadness": 0, "surprise": 0 }
+
+    datajson = json.loads(data.decode())
     for i in range(len(datajson)):
         emotions = (datajson[i]['scores'])
 
@@ -231,6 +342,7 @@ def testedmovie():
     print(dictemotions)
     mood = (max(dictemotions, key=dictemotions.get))
     return User_Action(mood)
+
 
 @app.route("/pastRecs/", methods=["POST","GET"])
 def test():
@@ -276,8 +388,25 @@ def test():
         messageP=posterLst, 
         message2=sugg1Lst, 
         messageO=overviewLst)
-
-
+  
+@app.route("/uploadImage/", methods=['POST', 'GET'])
+def uploadFile():
+    if request.method == 'POST':
+        file = request.files['photo']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(index.html)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_filename = str(uuid.uuid4()) + "." + filename.rsplit('.', 1)[1]
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+            saveFileToS3('cs411photo', app.config['UPLOAD_FOLDER'], unique_filename)
+            print(unique_filename)
+            file_url = "https://s3.amazonaws.com/cs411photo/" + unique_filename
+            print(file_url)
+            return testedmovie_image(file_url)
+    return ""
+  
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)

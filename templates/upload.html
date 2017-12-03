@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Photo</title>
+</head>
+<body>
+    <div class="title">
+            <h1>Upload a photo to get recommendations!</h1>
+    </div>
+            <form method="post" enctype="multipart/form-data" action="/uploadImage/">
+                <label for="photo">Select photo:</label>
+                <input type="file" name="photo" required/><br />
+                <input type="submit" value="upload" />
+            </form>
+</body>
+</html>

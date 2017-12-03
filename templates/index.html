@@ -18,16 +18,21 @@
     {% endif %}
 
        <h2> Enter a URL of a photo and get movies! </h2>
-    <h4>Acceptable extensions:  'png', 'jpg', 'jpeg', 'gif'</h4>
-        <form action="/EnterURLmovie/" method="post">
-            <input type="text" name="url">
-            <input type=submit value="Enter a URL">
-        </form>
-
-        <form action="/pastRecs/" method="get">
+         <h4>Acceptable extensions:  'png', 'jpg', 'jpeg', 'gif'</h4>
+            <form action="/EnterURLmovie/" method="post">
+                <input type="text" name="url">
+                <input type=submit value="Enter a URL">
+            </form>
+  
+      <form action="/pastRecs/" method="get">
             <input type=submit value="Past">
-        </form>
-    </div>
+      </form>
+
+      <b>{{ error }}</b>
+  
+    <p>Don't have an URL? Upload a photo right now!<br>
+        <a href="upload">Upload now</a>
+    </p>
 
 </body>
 
