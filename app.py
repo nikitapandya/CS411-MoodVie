@@ -106,15 +106,27 @@ def User_Action(mood):
         posterlist = []
         overviewlist = []
 
-        while len(randomnums) < 5:
-            randindex = random.randint(0, 19)
-            if randindex not in randomnums:
-                randomnums.append(randindex)
-        for i in range(5):
-            titles += dataj['results'][randomnums[i]]['original_title'] + ", "
-            suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
-            posterlist.append("http://image.tmdb.org/t/p/w185" + dataj['results'][randomnums[i]]['poster_path'])
-            overviewlist.append(dataj['results'][randomnums[i]]['overview'])
+        for i in range(10):
+            randomnums.append(random.randint(0,20))
+
+        count = 0
+        i = 0
+        while count < 5:
+            try:
+                thissuggestion = dataj['results'][randomnums[i]]['original_title']
+                thisposter = dataj['results'][randomnums[i]]['poster_path']
+                thisoverview = dataj['results'][randomnums[i]]['overview']
+                suggestionLst.append(thissuggestion)
+                posterlist.append("http://image.tmdb.org/t/p/w185" + thisposter)
+                overviewlist.append(thisoverview)
+                i += 1
+                count += 1
+
+            except Exception as e:
+                i += 1
+                print("EXCEPTION")
+                continue
+
 
         # return titles[:-2]
         return getResults(suggestionLst, posterlist, overviewlist, mood, genre)
