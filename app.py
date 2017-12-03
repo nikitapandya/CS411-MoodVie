@@ -46,7 +46,7 @@ def load_user(id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', error = "")
 
 
 @app.route('/logout')
@@ -81,33 +81,50 @@ def oauth_callback(provider):
     return redirect(url_for('index'))
 
 @app.route("/User_Action/", methods=["POST", "GET"])
+
 def User_Action(mood):
     mooddict = {"anger": ["28", "12"], "contempt": ["27"], "disgust": ["16","99"], "fear": ["10749"], "happiness": ["35", "10402"],"neutral": ["80", "878"], "sadness": ["12"], "surprise": ["53","14","9648"]}
     text1 = mooddict[mood]
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
-    randompage = random.randint(1,301)
-    print(text)
+    randompage = random.randint(1,20)
+    genredict = {"28": "Action", "12": "Adventure", "16": "Animation", "35": "Comedy", "80": "Crime", "99": "Documentary",
+            "18": "Drama", "10751": "Family", "14": "Fantasy", "36": "History", "27": "Horror", "10402": "Music",
+             "9648": "Mystery", "10749": "Romance", "878": "Science Fiction", "10770": "TV Movie", "53": "Thriller",
+             "10752": "War", "37": "Western"}
     #text = request.form["Genre"]
+    genre = genredict[str(text)]
     payload = "{}"
     try:
-        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
+        conn.request("GET", "/3/genre/"+ text +"/movies?sort_by=created_at.asc&include_adult=false&language=en-US&sort_by=popularity.desc&api_key=" + Secret.moviesecret + "&page=" + str(randompage), payload)
         res = conn.getresponse()
         data = res.read()
-        dataj = json.loads(data.decode()) 
-
+        dataj = json.loads(data.decode())
         titles = ""
         randomnums = []
+        suggestionLst = []
+        posterlist = []
+        overviewlist = []
+
         while len(randomnums) < 5:
-            randindex = random.randint(0,19)
+            randindex = random.randint(0, 19)
             if randindex not in randomnums:
                 randomnums.append(randindex)
         for i in range(5):
             titles += dataj['results'][randomnums[i]]['original_title'] + ", "
-        return titles[:-2]
+            suggestionLst.append(dataj['results'][randomnums[i]]['original_title'])
+            posterlist.append("http://image.tmdb.org/t/p/w185" + dataj['results'][randomnums[i]]['poster_path'])
+            overviewlist.append(dataj['results'][randomnums[i]]['overview'])
 
+        # return titles[:-2]
+        return getResults(suggestionLst, posterlist, overviewlist, mood, genre)
     except Exception as e:
-        print(e.args) 
+        print(e.args)
+
+def getResults(suggestionlist, posterlist, overviewlist, mood, genre):
+    return render_template('results.html', suggestionlist = suggestionlist, posterlist = posterlist,
+                           overviewlist = overviewlist, mood = mood, genre = genre)
+
 
 @app.route("/EnterURL/", methods=["POST", "GET"])
 def tested():
@@ -170,17 +187,20 @@ def testedmovie():
             "sadness": 0, "surprise": 0 }
 
     datajson = json.loads(data.decode())
-    for i in range(len(datajson)):
-        emotions = (datajson[i]['scores'])
+    try:
+        for i in range(len(datajson)):
+            emotions = (datajson[i]['scores'])
 
         for key, value in dictemotions.items():
             dictemotions[key] += emotions[key]
 
-    print(dictemotions)
-    mood = (max(dictemotions, key=dictemotions.get))
-    print(mood)
-    return User_Action(mood)
+        print(dictemotions)
+        mood = (max(dictemotions, key=dictemotions.get))
+        print(mood)
+        return User_Action(mood)
 
+    except Exception as e:
+        return render_template('index.html', error = "Invalid URL. Please try again.")
 
 
 
