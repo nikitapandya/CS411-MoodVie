@@ -409,7 +409,8 @@ def uploadFile():
             file_url = "https://s3.amazonaws.com/cs411photo/" + unique_filename
             print(file_url)
             return testedmovie_image(file_url)
-    return ""
+    flash("Please select a valid photo! allowed:'pdf', 'png', 'jpg', 'jpeg', 'gif'")
+    return render_template('index.html', error = "")
   
 if __name__ == '__main__':
     db.create_all()
