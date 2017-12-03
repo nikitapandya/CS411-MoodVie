@@ -9,6 +9,37 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from oauth import OAuthSignIn
 from secret import Secret
+import boto3
+from boto.s3.key import Key
+from werkzeug.utils import secure_filename
+import uuid
+
+app = Flask(__name__)
+app.config['akey'] = Secret.AWS_ACCESS_KEY_ID
+app.config['sKey'] = Secret.AWS_SECRET_ACCESS_KEY
+app.config['bucket'] = 'cs411photo'
+
+def enviroment(filename):
+    # Create an S3 client
+    s3 = boto3.client('s3')
+
+    # Create the configuration for the website
+    website_configuration = {
+        'ErrorDocument': {'Key': 'error.html'},
+        'IndexDocument': {'Suffix': 'index.html'},
+    }
+
+    # Set the new policy on the selected bucket
+    s3.put_bucket_website(
+        Bucket='my-bucket',
+        WebsiteConfiguration=website_configuration
+    )
+
+def saveFileToS3(bucket, path, filename):
+    s3 = boto3.resource('s3')
+    data = open(path + "/" + filename, 'rb')
+    s3.Bucket(bucket).put_object(Key=filename, Body=data, ACL='public-read')
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
@@ -216,6 +247,77 @@ def testedmovie():
     except Exception as e:
         return render_template('index.html', error = "Invalid URL. Please try again.")
 
+#upload
+UPLOAD_FOLDER = '/Users/ruochen/desktop/UPLOAD'
+ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route("/upload/")
+def upload():
+    return render_template("upload.html")
+
+def testedmovie_image(url):
+
+    text = url
+    print(text)
+
+    headers = {
+    'Content-Type': 'application/json',
+    'Ocp-Apim-Subscription-Key': Secret.microsoftsecret,
+    }
+
+    params = urllib.parse.urlencode({
+    })
+
+    body = "{ 'url': '" + text + "' }"
+    print(body)
+
+    payload = "{}"
+    try:
+        conn = http.client.HTTPSConnection('westus.api.cognitive.microsoft.com')
+        conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
+        res = conn.getresponse()
+        data = res.read()
+        # print(data)
+        conn.close()
+    except Exception as e:
+        print(e.args)
+
+    dictemotions = {"anger": 0, "contempt": 0, "disgust": 0, "fear": 0, "happiness": 0, "neutral":0,
+            "sadness": 0, "surprise": 0 }
+
+    datajson = json.loads(data.decode())
+    for i in range(len(datajson)):
+        emotions = (datajson[i]['scores'])
+
+        for key, value in dictemotions.items():
+            dictemotions[key] += emotions[key]
+
+    print(dictemotions)
+    mood = (max(dictemotions, key=dictemotions.get))
+    print(mood)
+    return User_Action(mood)
+
+@app.route("/uploadImage/", methods=['POST', 'GET'])
+def uploadFile():
+    if request.method == 'POST':
+        file = request.files['photo']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(index.html)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_filename = str(uuid.uuid4()) + "." + filename.rsplit('.', 1)[1]
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+            saveFileToS3('cs411photo', app.config['UPLOAD_FOLDER'], unique_filename)
+            print(unique_filename)
+            file_url = "https://s3.amazonaws.com/cs411photo/" + unique_filename
+            print(file_url)
+            return testedmovie_image(file_url)
+    return ""
 
 
 if __name__ == '__main__':
