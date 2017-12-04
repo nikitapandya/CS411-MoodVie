@@ -18,7 +18,7 @@
 
     <header id="header">
         <div class="inner">
-            <a href="index.html" class="logo">Moodvie</a>
+            <span class="logo">Moodvie</span>
         </div>
     </header>
 
@@ -40,9 +40,6 @@
                     <h2>Hi, {{ current_user.nickname }}!</h2>
                 </header>
                 <p>What is Moodvie? When it is movie night and you don’t know what to watch… snap a selfie and let your mood decide! Upload your selfie to our website and using Microsoft’s Emotion API and the Netflix API, we will recommend the perfect movie or TV show to go with your mood, like a comedy when you’re happy or an action movie when you’re angry.</p>
-                <ul class="actions">
-                    <li><a class="button alt" href="{{ url_for('logout') }}">Logout</a></li>
-                </ul>
             </div>
         </section>
 
@@ -61,6 +58,8 @@
                             <input type="text" name="url">
                             <input class="button alt" type=submit value="Enter a URL">
                          </form>
+                                                <div><b>{{ error }}</b></div>
+
                     </div>
                 </article>
                 <article>
@@ -72,6 +71,7 @@
                            <form action="/upload/" method="get">
                                 <input class="button alt" type=submit value="Upload">
                             </form>
+
                     </div>
                 </article>
                 <article>
@@ -88,9 +88,14 @@
             </div>
         </section>
 
-
-        <b>{{ error }}</b>
-
+        <section id="one">
+            <div class="inner">
+                <center>
+                <ul class="actions">
+                    <li><a class="button alt" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul></center>
+            </div>
+        </section>
 
     {% else %}
 
