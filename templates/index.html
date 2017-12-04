@@ -40,9 +40,6 @@
                     <h2>Hi, {{ current_user.nickname }}!</h2>
                 </header>
                 <p>What is Moodvie? When it is movie night and you don’t know what to watch… snap a selfie and let your mood decide! Upload your selfie to our website and using Microsoft’s Emotion API and the Netflix API, we will recommend the perfect movie or TV show to go with your mood, like a comedy when you’re happy or an action movie when you’re angry.</p>
-                <ul class="actions">
-                    <li><a class="button alt" href="{{ url_for('logout') }}">Logout</a></li>
-                </ul>
             </div>
         </section>
 
@@ -88,9 +85,14 @@
             </div>
         </section>
 
-
-        <b>{{ error }}</b>
-
+        <section id="one">
+            <div class="inner">
+                <center>
+                <ul class="actions">
+                    <li><a class="button alt" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul></center>
+            </div>
+        </section>
 
     {% else %}
 
