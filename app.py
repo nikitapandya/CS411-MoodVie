@@ -23,7 +23,7 @@ app.config['akey'] = Secret.AWS_ACCESS_KEY_ID
 app.config['sKey'] = Secret.AWS_SECRET_ACCESS_KEY
 app.config['bucket'] = 'cs411photo'
 
-def environment(filename):
+def enviroment(filename):
     # Create an S3 client
     s3 = boto3.client('s3')
 
@@ -153,7 +153,6 @@ def oauth_callback(provider):
 def User_Action(mood):
     mooddict = {"anger": ["28", "12"], "contempt": ["27"], "disgust": ["16","99"], "fear": ["10749"], "happiness": ["35", "10402"],"neutral": ["80", "878"], "sadness": ["12"], "surprise": ["53","14","9648"]}
     text1 = mooddict[mood]
-    #print("Text1: " + text1)
     randomnum = random.randint(0, len(text1)-1)
     text = text1[randomnum]
     randompage = random.randint(1,20)
@@ -161,7 +160,6 @@ def User_Action(mood):
             "18": "Drama", "10751": "Family", "14": "Fantasy", "36": "History", "27": "Horror", "10402": "Music",
              "9648": "Mystery", "10749": "Romance", "878": "Science Fiction", "10770": "TV Movie", "53": "Thriller",
              "10752": "War", "37": "Western"}
-    #text = request.form["Genre"]
     genre = genredict[str(text)]
     payload = "{}"
     try:
@@ -220,7 +218,6 @@ def getResults(suggestionlist, posterlist, overviewlist, mood, genre):
 
 @app.route("/EnterURL/", methods=["POST", "GET"])
 def tested():
-
     text = request.form["url"]
     print(text)
 
@@ -241,7 +238,6 @@ def tested():
         conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
         res = conn.getresponse()
         data = res.read()
-        # print(data)
         conn.close()
         return data
     except Exception as e:
@@ -249,7 +245,6 @@ def tested():
 
 @app.route("/EnterURLmovie/", methods=["POST", "GET"])
 def testedmovie():
-
     text = request.form["url"]
     print(text)
 
@@ -361,7 +356,7 @@ def test():
     overviewLst = [] 
 
     if (ordered is None):
-        message = "You have no past recomendations"
+        message = "You have no past recommendations"
     
     else:   
         for row in filtered:
