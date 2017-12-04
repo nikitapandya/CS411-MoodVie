@@ -23,7 +23,7 @@ app.config['akey'] = Secret.AWS_ACCESS_KEY_ID
 app.config['sKey'] = Secret.AWS_SECRET_ACCESS_KEY
 app.config['bucket'] = 'cs411photo'
 
-def environment(filename):
+def enviroment(filename):
     # Create an S3 client
     s3 = boto3.client('s3')
 
